@@ -11,6 +11,7 @@ from models.event import Event, KeyPress, MouseClick, MousePosition
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
+_filename = None
 _events: list[Event] = []
 _last_mouse_move_time = 0
 
@@ -32,7 +33,7 @@ def _on_move(x: int, y: int):
         _last_mouse_move_time = now
         _events.append(MousePosition(position=(x, y)))
 
-def _export_events(filename: str = "events.json"):
+def _export_events(filename: str):
     try:
         if not filename.lower().endswith(".json"):
             filename += ".json"
@@ -48,11 +49,14 @@ def _export_events(filename: str = "events.json"):
 
 
 def _handle_exit(signum: int, frame: types.FrameType):
-    _export_events()
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    _export_events(f"{_filename}_{timestamp}.json".lower().replace(" ", "_"))
     sys.exit(0)
 
-
 def main():
+    global _filename
+    _filename = input("Type the hero to track events for: ")
+
     signal.signal(signal.SIGINT, _handle_exit)
     signal.signal(signal.SIGTERM, _handle_exit)
 
